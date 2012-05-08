@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<component>
+  <displayName>ShakeVelocity</displayName>
+  <className>sprout.custom.ShakeComponent</className>
+  <width>200</width>
+  <height>85</height>
+  <minimumWidth>200</minimumWidth>
+  <minimumHeight>85</minimumHeight>
+  <description>This component triggers a shake from the device displaying this ad.</description>
+  <properties>
+    <property name="sensitivity" displayName="Min shake amount" datatype="number" value="20" minimum="0" maximum="100"/>
+  </properties>
+  <version>1</version>
+  <triggers>
+    <trigger name="shake" displayName="Shake" htmlSupport="true"/>
+  </triggers>
+  <script><![CDATA[
+	
+goog.provide("sprout.custom.ShakeComponent");
+
+goog.require("sprout.ad.element.Component");
+
+if (!COMPILED) {
+	sprout.custom = sprout.custom || {};
+}
+
+/**
+ * @constructor
+ * @extends {sprout.ad.element.Component}
+ */	
+sprout.custom.ShakeComponent = sprout.ad.element.Component.extend({
+    a1: { x: 0, y: 0, z: 0 },
+    a2: { x: 0, y: 0, z: 0 },
+
+    initialize: function() {
+        this._super();
+    	var _this = this;
+	if (!!window.DeviceMotionEvent) {
+		window.ondevicemotion = function(event) {
+			_this.a1 = event.accelerationIncludingGravity;
+		};
+		setInterval(function() {
+			var sensitivity = _this.getProperty('sensitivity');
+			var change = Math.abs(_this.a1.x - _this.a2.x + _this.a1.y - _this.a2.y + _this.a1.z - _this.a2.z);
+			if (change > sensitivity) {
+				_this.fireTrigger('shake');
+			}
+			_this.a2 = _this.a1;
+		}, 150);
+	}
+    }
+}, "sprout.custom.ShakeComponent");
+	]]></script>
+</component>
